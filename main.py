@@ -6,6 +6,7 @@ from pathlib import Path
 
 # 添加当前目录到 Python 路径，以便找到自定义的 nnunetv2 模块
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = Path(__file__).resolve().parent
 
 def setup_nnunet_environment(dataset_id, raw_data_base, preprocessed_base, results_base):
     """
@@ -103,7 +104,8 @@ def train_model(dataset_id, configuration='2d', fold=0, trainer='nnUNetTrainer',
     print(f"\n🏋️ 开始训练模型 (配置={configuration}, 验证集=fold {fold}, 训练集=其他{4}折)")
     # 构建命令
     command = [
-        'nnUNetv2_train',
+        sys.executable,
+        str(PROJECT_ROOT / 'tool' / 'nnunetv2_train_local.py'),
         dataset_id,
         configuration,
         str(fold),
