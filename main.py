@@ -21,6 +21,7 @@ def setup_nnunet_environment(dataset_id, raw_data_base, preprocessed_base, resul
     os.environ['nnUNet_preprocessed'] = preprocessed_base
     os.environ['nnUNet_results'] = results_base
     
+    
     print(f"环境变量设置:")
     print(f"  nnUNet_raw = {raw_data_base}")
     print(f"  nnUNet_preprocessed = {preprocessed_base}")

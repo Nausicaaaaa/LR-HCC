@@ -1,5 +1,6 @@
 ﻿import argparse
 from pathlib import Path
+from typing import Union
 
 import nibabel as nib
 import numpy as np
@@ -187,7 +188,7 @@ def find_label_bboxes(label_slice: np.ndarray) -> list[tuple[int, tuple[int, int
     return bboxes
 
 
-def load_annotation_font(font_size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+def load_annotation_font(font_size: int) -> Union[ImageFont.FreeTypeFont, ImageFont.ImageFont]:
     """加载较大的标注字体，失败时回退到默认字体。"""
     candidate_fonts = [
         'arial.ttf',
@@ -412,7 +413,7 @@ def main(default_input_dir: Path, default_output_dir: Path):
 
 
 if __name__ == '__main__':
-    INPUT_DIR = Path("nnunet/nnUNet_raw/Dataset003_HCC")
+    INPUT_DIR = Path("data/nnUNet_raw/Dataset001_HCC")
     OUTPUT_DIR = Path("./visualization_output")
 
     main(INPUT_DIR, OUTPUT_DIR)
@@ -420,5 +421,5 @@ if __name__ == '__main__':
 # python visualisation.py --case_id case_001 --slice_n 50
 
 # 保存该 case 全部层（会自动保存，不需要 --save）
-# python visualisation.py --case_id case_700 --slice_n all
+# python visualisation.py --case_id case_1219 --slice_n all
 # python visualisation.py --case_id case_002 --slice_n all --modality 0

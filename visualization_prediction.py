@@ -4,13 +4,16 @@
 
 用法:
     # 对比单个 case 的所有切片
-    python compare_prediction.py --case_id case_005 --slice_n all
+    python visualization_prediction.py --case_id case_001 --slice_n=all
     
     # 对比单个 case 的指定切片
-    python compare_prediction.py --case_id case_001 --slice_n 50
+    python visualization_prediction.py --case_id case_001 --slice_n 50
     
     # 指定不同的 fold 或配置
-    python compare_prediction.py --case_id case_001 --slice_n all --fold 0 --configuration 2d
+    python visualization_prediction.py --case_id case_001 --slice_n all --fold 0 --configuration 2d
+
+    默认参数：数据集 001 , slice_n=all, fold=0, configuration=2d 
+    输出路径：visualization_output
 """
 
 import argparse
@@ -444,7 +447,7 @@ def main():
     parser.add_argument(
         '--output_dir',
         type=Path,
-        default=Path('./comparison_output'),
+        default=Path('./visualization_output/val_comparison'),
         help='输出目录',
     )
     parser.add_argument('--wl', type=float, default=60.0, help='Window level for CT display.')
