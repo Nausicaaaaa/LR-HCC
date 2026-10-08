@@ -115,7 +115,7 @@ bash scripts/run_subcv.sh
 
 ## 最终模型权重
 
-论文交付的最终诊断（分类）模型为**模型 2（影像 + 征象 + 临床变量）**。其最优权重 `model_best.pth.tar` 约 250 MB，超过 GitHub 单文件 100 MB 限制，因此**不纳入 Git 版本控制，改由 [GitHub Release](https://github.com/Nausicaaaaa/LR-HCC/releases) 分发**。
+论文交付的最终诊断（分类）模型为**模型 2（影像 + 征象 + 临床变量）**。其模型权重 `model_best.pth.tar` 由 [GitHub Release](https://github.com/Nausicaaaaa/LR-HCC/releases) 分发。
 
 | 项目 | 内容 |
 |:---|:---|
