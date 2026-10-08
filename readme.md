@@ -28,7 +28,7 @@
 
 ## 三分类诊断性能
 
-诊断模型将病灶分为 **良性 / 恶性非 HCC / HCC** 三类。以下为融合临床变量的诊断模型在**内部验证集**与**外部测试集**上的性能
+诊断模型将病灶分为 **良性 / 恶性非 HCC / HCC** 三类。以下为融合临床变量的诊断模型在**内部验证集**与**外部测试集**上的性能。
 
 **各类别 AUC**
 
@@ -54,7 +54,6 @@
 | Macro-AUC | 0.955 | 0.855 |
 | Kappa | 0.814 | 0.588 |
 
-
 ## 系统架构
 
 ### 阶段一 · 病灶检测（nnU-Net v2）
@@ -63,7 +62,7 @@
 
 ### 阶段二 · 三分类诊断（LIFT：Transformer + TCAV）
 
-以检测出的病灶为输入，端到端 Transformer（Uniformer-B，加载 Kinetics-400 预训练权重）联合**概念激活向量（TCAV）**，将模型决策关联到可理解的影像征象（动脉期高强化、非周边廓清、包膜强化、马赛克结构等），输出 LR 分级与三分类结果。诊断模型按是否融合临床变量分为两个：
+以检测出的病灶为输入，端到端 Transformer（UniFormer-S，加载 Kinetics-400 预训练权重）联合**概念激活向量（TCAV）**，将模型决策关联到可理解的影像征象（动脉期高强化、非周边廓清、包膜强化、马赛克结构等），输出 LR 分级与三分类结果。诊断模型按是否融合临床变量分为两个：
 
 | 模型 | 输入 | 输出 |
 |:---|:---|:---|
@@ -109,7 +108,7 @@ bash scripts/run_subcv.sh
 
 ## 最终模型权重
 
-论文交付的最终诊断（分类）模型为**模型 2（影像 + 征象 + 临床变量）**。其模型权重 `model_best.pth.tar` 由 [GitHub Release](https://github.com/Nausicaaaaa/LR-HCC/releases) 分发。
+论文交付的最终诊断（分类）模型为**模型 2（影像 + 征象 + 临床变量）**。其模型权重 `model_best.pth.tar` 由 [GitHub Release](https://github.com/Nausicaaaaa/LR-HCC/releases/tag/model) 分发。
 
 | 项目 | 内容 |
 |:---|:---|
@@ -120,7 +119,7 @@ bash scripts/run_subcv.sh
 
 **下载与校验**
 
-从 [Release 页面](https://github.com/Nausicaaaaa/LR-HCC/releases) 下载 `model_best.pth.tar` 后校验完整性：
+直接下载 [`model_best.pth.tar`](https://github.com/Nausicaaaaa/LR-HCC/releases/download/model/model_best.pth.tar) 后校验完整性：
 
 ```bash
 echo "08db91dcd02b554034b19f74e1f9c4060de3ac7221d14168f03b237b95d49ed7  model_best.pth.tar" | sha256sum -c -
