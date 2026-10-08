@@ -20,6 +20,7 @@
 - [系统架构](#系统架构)
 - [项目结构](#项目结构)
 - [快速开始](#快速开始)
+- [最终模型权重](#最终模型权重)
 
 ## 简介
 
@@ -110,4 +111,40 @@ python scripts/prediction/main.py --dataset_id 001
 
 # 诊断模型 5 折子交叉验证训练
 bash scripts/run_subcv.sh
+```
+
+## 最终模型权重
+
+论文交付的最终诊断（分类）模型为**模型 2（影像 + 征象 + 临床变量）**。其最优权重 `model_best.pth.tar` 约 250 MB，超过 GitHub 单文件 100 MB 限制，因此**不纳入 Git 版本控制，改由 [GitHub Release](https://github.com/Nausicaaaaa/LR-HCC/releases) 分发**。
+
+| 项目 | 内容 |
+|:---|:---|
+| 模型 | 模型 2 · `uniformer_small_IL_features`（3 分类：良性 / 恶性非 HCC / HCC） |
+| 权重文件 | `model_best.pth.tar`（约 250 MB） |
+| 训练配置 | fold 1 · AdamW · lr 1e-4 · cosine · seed 42 · 输入 20×96×96 · 融合临床变量（clinical_dim=10） |
+| SHA256 | `08db91dcd02b554034b19f74e1f9c4060de3ac7221d14168f03b237b95d49ed7` |
+
+**下载与校验**
+
+从 [Release 页面](https://github.com/Nausicaaaaa/LR-HCC/releases) 下载 `model_best.pth.tar` 后校验完整性：
+
+```bash
+echo "08db91dcd02b554034b19f74e1f9c4060de3ac7221d14168f03b237b95d49ed7  model_best.pth.tar" | sha256sum -c -
+```
+
+**放置与推理**
+
+将权重放回 `LIFT/ckpts/Model2/uniformer_small_IL_features/model_best.pth.tar`，即可复现推理（完整训练/推理超参见同目录 `args.yaml`）：
+
+```bash
+cd LIFT
+python ./main/predict.py \
+  --model uniformer_small_IL_features --num-classes 3 \
+  --include-clinical --clinical-dim 10 \
+  --data_dir ./data/images \
+  --val_anno_file ./data/labels/val_fold1.txt \
+  --checkpoint ./ckpts/Model2/uniformer_small_IL_features/model_best.pth.tar \
+  --results-dir ./ckpts/Model2/uniformer_small_IL_features/pred_results/val \
+  --score-dir ./ckpts/Model2/uniformer_small_IL_features/pred_results/val \
+  -j 0 -b 1
 ```
