@@ -76,6 +76,7 @@
 LR-HCC/
 ├── readme.md                   # 项目说明（本文件）
 ├── requirements.txt            # Python 依赖
+├── .gitignore                  # 版本控制忽略规则
 ├── scripts/                    # 全部脚本，按功能分类（均从项目根目录运行）
 │   ├── preprocessing/          # 预处理：preprocess / rebuild_labels / remove_small_label_cases / convert_json_to_csv
 │   ├── prediction/             # 训练与推理入口：main / predict_smallROI / predict_features / predict_features_3class
@@ -83,18 +84,11 @@ LR-HCC/
 │   ├── visualization/          # 可视化：visualisation / visualization_original / render_mermaid
 │   └── run_subcv.sh            # 5 折子交叉验证训练流水线
 ├── nnunetv2/                   # 检测模型：自定义 nnU-Net v2 Trainer(smallROI) 与损失(FocalDice)
-├── LIFT/                       # 诊断模型：Transformer + TCAV 代码、权重与预测（独立子仓库）
-├── tool/                       # 辅助工具：标签检查、训练曲线绘制、本地训练
-├── result_test/                # 分割 / 检测评估脚本与结果
-├── shap_outputs/               # SHAP、t-SNE 归因分析脚本与结果
-├── 附件/                        # 流程图配图与病例数据表
-├── 流程图/                      # 流程图源文件
-├── data/                       # nnU-Net 原始 / 预处理 / 结果数据（不纳入版本控制）
-├── 外部验证集/                   # 外部验证数据（不纳入版本控制）
-├── results/                    # 特征预测结果 csv（不纳入版本控制）
-├── model_comparison_results/   # 模型对比图表（不纳入版本控制）
-├── visualization_output/       # 可视化输出（不纳入版本控制）
-└── docs/                       # 分析报告等文档（不纳入版本控制）
+├── LIFT/                       # 诊断模型：Transformer + TCAV 训练/推理代码（权重经 GitHub Release 分发）
+├── result_test/                # 分割 / 检测评估脚本
+├── shap_outputs/               # SHAP、t-SNE 归因分析脚本
+├── 流程图/                      # 流程图源文件与配图
+└── 附件/                        # ROC 曲线等报告配图
 ```
 
 ## 快速开始
