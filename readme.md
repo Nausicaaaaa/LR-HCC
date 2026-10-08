@@ -111,5 +111,3 @@ python scripts/prediction/main.py --dataset_id 001
 # 诊断模型 5 折子交叉验证训练
 bash scripts/run_subcv.sh
 ```
-
-> 脚本内部统一使用相对**项目根目录**的路径，请务必在根目录下运行。
