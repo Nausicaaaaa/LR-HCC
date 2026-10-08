@@ -1,96 +1,115 @@
-# 开发可解释AI模型识别高风险背景下肝脏局灶性病变的良恶性并精准诊断HCC
+<div align="center">
 
-1. **检测模型**：输入CT四期图像，基于nnU-Net的病灶检测模型 识别CT图像中的可疑病灶
-2. **诊断模型**：
-    - 诊断模型1：（Transformer端-端 + 概念激活向量解释）→ 【LR1/2，LR3，LR4，LR5，LRM】和【良性，恶性非HCC，HCC】
-        - 选择准确率超过0.8 的特征为最佳特征为病灶分类结果提供归因解释
-    - 诊断模型2：模型1+模型1输出的LR等级→输出：良性，恶性非HCC，HCC
-    - 诊断模型3：模型2+有意义的临床变量→输出：良性，恶性非HCC，HCC
+# 可解释 AI 肝癌诊断系统
 
-## 数据说明
+**高风险背景下肝脏局灶性病变的良恶性识别与 HCC 精准诊断**
 
-|           | HCC | 恶性非HCC | 良性 | ALL | 备注                     |
-| --------- | --- | --------- | ---- | --- | ------------------------ |
-| 附二      | 417 | 42        | 51   | 510 | 存在数据缺失7例          |
-| 西南      | 575 | 102       | 34   | 711 | 存在数据缺失2例          |
-| all       | 991 | 143       | 85   |     |                          |
-| 4模态数据 | 917 | 128       | 66   |1111| 去除了模态匹配不佳的数据 |
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-1.12.1-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![CUDA](https://img.shields.io/badge/CUDA-11.3-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
+[![timm](https://img.shields.io/badge/timm-0.5.4-orange)](https://github.com/rwightman/pytorch-image-models)
 
-## 1. 检测模型
+</div>
 
-### 1.1 数据处理
-
-1.`preprocess.py`进行预处理
-- 文件处理：
-  - 遍历地址 把四期CT（A、D、P、S or PS）对应为四种模态，命名为case_xxx_xxxx
-  - 处理后的图像、标签分别保存到 `nnUNet_raw\Dataset001_HCC\imagesTr`及`labelsTr`
-  - `case_name_mapping.txt`原始ID对应的 case_xxx 和类别
-  - `case_skip_data.txt` 为存在缺失数据跳过的ID
-- 图像处理：
-  - 4 个模态的图像对齐到 A 模态的空间网格，统一shape / spacing / orientation / affine ，保证物理尺度一致
-  - <MARK>注意：4个模态因为是不同时期扫的 因此不是天然的完全配准
-- 标签处理：
-  - 把HCC、恶性非HCC、良性三类的标签映射为不同的值（HCC=1，onHCC=2、laingxing=3）命名为case_xxx
-  - <MARK>为确保标签的有效性 取4个标签的并集
-  - 去除并集为0或小于500的的case 并返回case列表
-  
-  > 取并集的问题：有些地方不是ROI而被划分进去 导致干扰
-  > 取交集的问题：更谨慎 但有些ROI会被去除掉 只能去除一些交集后ROI体素过小的case（代表模态对齐效果差）
 ---
-- `Dataset001_HCC`存放4个模态的数据
-- `Dataset002_HCC`仅AP模态数据
 
-**可视化**
+## 目录
 
-`visualization_original.py` 原始图像&标签可视化 
+- [简介](#简介)
+- [三分类诊断性能](#三分类诊断性能)
+- [系统架构](#系统架构)
+- [项目结构](#项目结构)
+- [快速开始](#快速开始)
 
-`visualisation.py` 处理后的case 图像&标签可视化 **检查是否正确匹配**
+## 简介
+
+本项目构建一个**可解释的两阶段 AI 系统**，面向肝硬化等高风险背景：先由分割模型从四期增强 CT 中检出肝脏局灶性病变，再由诊断模型将其判定为 **良性 / 恶性非 HCC / HCC** 三类，并通过概念归因（TCAV）给出可解释的影像征象依据。
+
+## 三分类诊断性能
+
+诊断模型将病灶分为 **良性 / 恶性非 HCC / HCC** 三类。以下为融合临床变量的诊断模型在**内部验证集**与**外部测试集**上的性能
+
+**各类别 AUC**
+
+| 类别 | 内部验证 | 外部测试 |
+|:---|:---:|:---:|
+| 良性 | 0.971 | 0.916 |
+| 恶性非 HCC | 0.919 | 0.799 |
+| HCC | 0.976 | 0.849 |
+| **Macro 平均** | **0.955** | **0.855** |
+
+**ROC 曲线**（最终模型：影像 + 征象 + 临床变量）
+
+| 内部验证集 | 外部测试集 |
+|:---:|:---:|
+| <img src="附件/roc_final_val.png" alt="内部验证集 ROC 曲线" width="100%"/> | <img src="附件/roc_final_test.png" alt="外部测试集 ROC 曲线" width="100%"/> |
+
+**总体指标**
+
+| 指标 | 内部验证 | 外部测试 |
+|:---|:---:|:---:|
+| Accuracy | 0.895 | 0.764 |
+| Macro-F1 | 0.897 | 0.755 |
+| Macro-AUC | 0.955 | 0.855 |
+| Kappa | 0.814 | 0.588 |
 
 
-**数据上传服务器 ssh+rsync**
-``` bash
-rsync -avP --partial --append-verify --ignore-existing \
--e "ssh -p 21133 -T -c aes128-gcm@openssh.com -o Compression=no" \
-/mnt/c/Users/75267/Documents/python项目/LR-HCC/data/nnUNet_raw/Dataset001_HCC/labelsTr/ \
-KASR@106.120.24.118:/mnt/data/KASR/Dengsiyi/LR-HCC/data/nnUNet_raw/Dataset001_HCC/labelsTr/
+## 系统架构
+
+### 阶段一 · 病灶检测（nnU-Net v2）
+
+基于 nnU-Net v2 的 3D 分割模型，输入配准对齐后的四期增强 CT（动脉期 A / 门脉期 P / 延迟期 D / 平扫 S），输出病灶分割掩膜（ROI）。针对病灶前景占比极小的问题，采用自定义 Trainer `nnUNetTrainer_smallROI`（前景过采样）与 `FocalDiceLoss` 以提升小目标敏感度。
+
+### 阶段二 · 三分类诊断（LIFT：Transformer + TCAV）
+
+以检测出的病灶为输入，端到端 Transformer（Uniformer-B，加载 Kinetics-400 预训练权重）联合**概念激活向量（TCAV）**，将模型决策关联到可理解的影像征象（动脉期高强化、非周边廓清、包膜强化、马赛克结构等），输出 LR 分级与三分类结果。诊断模型按是否融合临床变量分为两个：
+
+| 模型 | 输入 | 输出 |
+|:---|:---|:---|
+| 模型 1 | 病灶多期影像 + 征象 | LR 分级 + HCC三分类 + 征象归因 |
+| 模型 2 | 病灶多期影像 + 征象 + 临床变量 | HCC三分类 |
+
+## 项目结构
+
+```text
+LR-HCC/
+├── readme.md                   # 项目说明（本文件）
+├── requirements.txt            # Python 依赖
+├── scripts/                    # 全部脚本，按功能分类（均从项目根目录运行）
+│   ├── preprocessing/          # 预处理：preprocess / rebuild_labels / remove_small_label_cases / convert_json_to_csv
+│   ├── prediction/             # 训练与推理入口：main / predict_smallROI / predict_features / predict_features_3class
+│   ├── analysis/               # 对比与统计：compare_* / generate_baseline_table / shap_analysis
+│   ├── visualization/          # 可视化：visualisation / visualization_original / render_mermaid
+│   └── run_subcv.sh            # 5 折子交叉验证训练流水线
+├── nnunetv2/                   # 检测模型：自定义 nnU-Net v2 Trainer(smallROI) 与损失(FocalDice)
+├── LIFT/                       # 诊断模型：Transformer + TCAV 代码、权重与预测（独立子仓库）
+├── tool/                       # 辅助工具：标签检查、训练曲线绘制、本地训练
+├── result_test/                # 分割 / 检测评估脚本与结果
+├── shap_outputs/               # SHAP、t-SNE 归因分析脚本与结果
+├── 附件/                        # 流程图配图与病例数据表
+├── 流程图/                      # 流程图源文件
+├── data/                       # nnU-Net 原始 / 预处理 / 结果数据（不纳入版本控制）
+├── 外部验证集/                   # 外部验证数据（不纳入版本控制）
+├── results/                    # 特征预测结果 csv（不纳入版本控制）
+├── model_comparison_results/   # 模型对比图表（不纳入版本控制）
+├── visualization_output/       # 可视化输出（不纳入版本控制）
+└── docs/                       # 分析报告等文档（不纳入版本控制）
 ```
 
-### 1.2 nnunetv2模型训练
+## 快速开始
 
-`python main.py`
+```bash
+# 环境要求：Python 3.8+，CUDA 11.3
+pip install -r requirements.txt
 
-> [!note] 小目标 ROI 分割改进方案
-> 当前问题:前景 ROI 占比极小（CT 中大部分为背景）, 标准 nnUNet 配置对小目标不够敏感
-> 改进方案:
->  1. 自定义 Trainer: `nnUNetTrainer_smallROI`
->       - **前景过采样**: `oversample_foreground_percent = 0.5`（原 0.0）
->       - 确保训练时 50% 的 patch 包含前景
->       - 解决小目标采样不足问题
->  2. 自定义损失函数: `FocalDiceLoss`
->       - Focal Loss 解决类别不平衡（`gamma=2.0, alpha=0.25`）
->       - 更关注难样本和小目标
->       - batch_dice=False 对每个样本单独计算 Dice
->  3. 其他
->       - 减小旋转角度**: 从 ±30° 减小到 ±15°,避免小目标被旋转出 patch
+# 数据预处理（四期 CT 配准对齐 + 标签生成）
+python scripts/preprocessing/preprocess.py
 
-<table>
-  <tr>
-    <th>train loss</th>
-    <th>train dice</th>
-  </tr>
-  <tr>
-    <td><img src="visualization_output/loss_training_log_2026_4_15_12_56_06.png" height="200" /></td>
-    <td><img src="visualization_output/dice_training_log_2026_4_15_12_56_06.png" height="200" /></td>
-  </tr>
-</table>
+# 检测模型全流程：预处理 + 训练 + 预测 + 评估
+python scripts/prediction/main.py --dataset_id 001
 
-### 1.3 nnunetv2模型验证
-|检测精度（acc）|检测平均dice|
-|--|--|
-|0.85|0.75|
+# 诊断模型 5 折子交叉验证训练
+bash scripts/run_subcv.sh
+```
 
-结果样例：
-
-<img src="visualization_output/val_comparison/case_001/case_001-slice-043.png" height="250" >
-
-
+> 脚本内部统一使用相对**项目根目录**的路径，请务必在根目录下运行。

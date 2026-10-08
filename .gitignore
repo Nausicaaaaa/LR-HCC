@@ -1,5 +1,75 @@
-data/
-附件/1_labelsTr-交集/
-visualization_output/
-.vscode/
+# ============================================================
+# Python 缓存 / 虚拟环境
+# ============================================================
 __pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+.vscode/
+.idea/
+.codex/
+.agents/
+.crossnote/
+
+# ============================================================
+# 数据：原始影像 / 数据集 
+# ============================================================
+data/
+LIFT/data/
+外部验证集/
+附件/1_labelsTr-交集/
+*.nii
+*.nii.gz
+case_name_mapping.txt
+case_name_mapping_test.txt
+附件/*.tsv
+附件/*.txt
+附件/*.deb
+
+# ============================================================
+# 结果 
+# ============================================================
+results/
+docs/
+visualization_output/
+model_comparison_results/
+mermaid_images/
+nohup.out
+*.log
+# result_test/ 的输出（保留其中的 .py 脚本）
+result_test/seg_comparison/
+result_test/internal_validation_results/
+result_test/validation_detection_results/
+result_test/*.csv
+result_test/*.json
+result_test/*.txt
+# shap_outputs/ 的输出（保留其中的 .py 脚本）
+shap_outputs/Model1/
+shap_outputs/Model2/
+shap_outputs/Model3/
+shap_outputs/*.png
+shap_outputs/*.csv
+shap_outputs/*.md
+shap_outputs/*.txt
+shap_outputs/*.log
+
+# ============================================================
+# 模型权重 / 大文件
+# ============================================================
+LIFT/ckpts/
+LIFT/pred_results/
+LIFT/pretrained_weights/
+*.pth
+*.pth.tar
+*.pt
+*.ckpt
+*.onnx
+*.pkl
+*.pdf
+
+# 本地检查脚本与备份（不推送）
+tool/
+*.bundle
